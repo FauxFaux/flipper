@@ -1,10 +1,49 @@
 import RPi.GPIO as GPIO
 import time
+import serial
+import os
+import sys
+
+def find_device() -> str:
+    options = [item for item in os.listdir('/dev') if item.startswith('ttyUSB')]
+    if len(options) != 1:
+        raise Exception('too many paths: ' + options)
+    return '/dev/{}'.format(options[0])
+
+def set_relays():
+    print('setting relays to {0:b}'.format(state))
+    fd.write(bytes([state]))
+
+
+def set_on(output: int):
+    global state
+    state ^= (1 << output)
+    set_relays()
+
+def set_off(output: int):
+    global state
+    state |= (1 << output)
+    set_relays()
+
+fd = serial.Serial(find_device(), 9600, timeout=1)
+
+if '--init' in sys.argv:
+    print('communicating with serial...')
+    # 0x50: hello!
+    fd.write(b'\x50')
+
+    # 0xac: I'm a relay, woo!
+    # or, if it's not (or we're already initialised), the timeout will get us
+    assert fd.read() == b'\xac'
+    print('it is there!')
+
+    # 0x51: go into data mode FOREVER
+    fd.write(b'\x51')
+
+state = 0xff
+set_relays()
 
 GPIO.setmode(GPIO.BCM)
-
-# controller
-GPIO.setup(4, GPIO.OUT)
 
 # light
 GPIO.setup(21, GPIO.OUT)
@@ -16,7 +55,11 @@ def light(status: bool) -> None:
     GPIO.output(21, GPIO.HIGH if status else GPIO.LOW)
 
 def controller(status: bool) -> None:
-    GPIO.output(4, GPIO.HIGH if status else GPIO.LOW)
+    relay = 3
+    if status:
+         set_on(relay)
+    else:
+         set_off(relay)
 
 def button() -> bool:
     return GPIO.input(26) == False
