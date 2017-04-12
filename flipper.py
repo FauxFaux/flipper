@@ -32,9 +32,11 @@ if '--init' in sys.argv:
     # 0x50: hello!
     fd.write(b'\x50')
 
-    # 0xac: I'm a relay, woo!
+    # 0xab: I'm a 4 channel relay, woo!
+    # 0xad: 2 channel
+    # 0xac: 8 channel
     # or, if it's not (or we're already initialised), the timeout will get us
-    assert fd.read() == b'\xac'
+    assert fd.read() == b'\xab'
     print('it is there!')
 
     # 0x51: go into data mode FOREVER
