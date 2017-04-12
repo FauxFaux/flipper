@@ -1,6 +1,11 @@
 Sample code for interacting with a relay which presents as USB Serial,
 from a Raspberry Pi-like device.
 
+Contrast with [usbrelay](https://github.com/FauxFaux/usbrelay),
+another type of USB-controlled relay that I bought, and rewrote the
+software for (but didn't document). (Yes, I thought I was buying the
+same thing this time. Doh!)
+
 
 ## Devices
 
@@ -63,6 +68,9 @@ For my 4-port relay, the relay furthest from the controller is relay
 `0`. As such, if you send the device the byte `0b_1111_1110`, it
 will switch "on" the furthest relay.
 
+Note that there's no way to exit switching mode, and trying to query
+the device while in switching mode will just switch stuff. Trying to
+read while in switching mode will hang indefinitely.
 
 ## Circuit
 
@@ -90,4 +98,9 @@ After 15 minutes, the relay is switched back off. When the relay is
 off, the "status" LED is lit. Pushing the button immediately toggles
 the state. Holding the button causes the relay to pulse once per
 second.
+
+Additionally, if `--init` is passed, it does the initilisation
+procedure. This needs to be done exactly once per boot/connection,
+unless someone makes the code remember per device, or handle the
+timeout on read, or something...
 
