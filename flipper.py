@@ -96,3 +96,6 @@ try:
        pause()
 finally:
     GPIO.cleanup()
+    state = 0xff
+    set_relays()
+
